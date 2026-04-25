@@ -1,13 +1,13 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { atms } from '../data/atmData';
+import { useBank } from '@/context/BankContext';
 import { calculateDuration } from '../utils/calculateDuration';
 import InputPanel from './InputPanel';
 import ResultCard from './ResultCard';
 import NetworkMap from './NetworkMap';
 import { motion } from 'framer-motion';
-import { Target, Activity, ShieldCheck } from 'lucide-react';
+import { Target, Activity, ShieldCheck, RefreshCw } from 'lucide-react';
 import { useI18n } from '@/context/LanguageContext';
 
 interface DashboardATMProps {
@@ -16,14 +16,17 @@ interface DashboardATMProps {
 
 export default function DashboardATM({ selectedAtmId }: DashboardATMProps) {
   const { t } = useI18n();
+  const { atms, refillAtm } = useBank();
   const [cashAmount, setCashAmount] = useState(80);
   const [dayType, setDayType] = useState('weekday');
 
-  const currentAtm = useMemo(() => atms.find(a => a.id === selectedAtmId) || atms[0], [selectedAtmId]);
+  const currentAtm = useMemo(() => atms.find(a => a.id === selectedAtmId) || atms[0], [selectedAtmId, atms]);
 
   const prediction = useMemo(() => {
-    return calculateDuration(selectedAtmId, cashAmount * 1000000, dayType);
-  }, [selectedAtmId, cashAmount, dayType]);
+    // Prediction based on current real-time cash if manual input is not changed significantly
+    // For demo, we still use calculateDuration but pass currentAtm.currentCash
+    return calculateDuration(selectedAtmId, currentAtm.currentCash, dayType);
+  }, [selectedAtmId, currentAtm.currentCash, dayType]);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">

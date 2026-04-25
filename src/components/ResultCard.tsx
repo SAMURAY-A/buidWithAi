@@ -70,7 +70,7 @@ export default function ResultCard({ prediction }: ResultCardProps) {
       <motion.div
         initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
-        className={`p-6 rounded-2xl border-2 flex items-center justify-between ${
+        className={`p-6 rounded-2xl border-2 flex flex-col md:flex-row items-center justify-between gap-4 ${
           isCritical ? 'bg-red-500/10 border-red-500/20 text-red-500' :
           isWarning ? 'bg-yellow-500/10 border-yellow-500/20 text-yellow-600' :
           'bg-emerald-500/10 border-emerald-500/20 text-emerald-600'
@@ -80,9 +80,26 @@ export default function ResultCard({ prediction }: ResultCardProps) {
           <AlertTriangle size={24} className="mr-4" />
           <div>
             <div className="text-sm font-black uppercase tracking-widest transition-colors">
-              {isCritical ? 'Critical Shortage' : isWarning ? 'Warning' : 'Healthy'}
+              {isCritical ? 'Critical Shortage Risk' : isWarning ? 'Moderate Risk' : 'Optimal Level'}
             </div>
+            <p className="text-[10px] uppercase font-bold opacity-70 tracking-widest">Risk Level: {isCritical ? 'Extreme' : isWarning ? 'Medium' : 'Low'}</p>
           </div>
+        </div>
+        <div className="flex items-center space-x-8">
+           <div>
+              <div className="text-[10px] uppercase font-black opacity-50 mb-1">Demand Trend</div>
+              <div className="flex items-center text-xs font-bold">
+                 <TrendingDown size={14} className="mr-1 rotate-180" />
+                 UPWARD (+12%)
+              </div>
+           </div>
+           <div>
+              <div className="text-[10px] uppercase font-black opacity-50 mb-1">Health Check</div>
+              <div className="flex items-center text-xs font-bold">
+                 <CheckCircle2 size={14} className="mr-1" />
+                 STABLE
+              </div>
+           </div>
         </div>
       </motion.div>
 

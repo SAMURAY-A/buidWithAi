@@ -11,10 +11,13 @@ interface Message {
   timestamp: Date;
 }
 
+import { useBank } from '@/context/BankContext';
+
 export default function SupportChat() {
+  const { recommendations, atms, branches } = useBank();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
-    { id: '1', role: 'ai', text: 'Hello! I am your ATM Optimization Assistant. How can I help you today?', timestamp: new Date() }
+    { id: '1', role: 'ai', text: 'Hello! I am your ATM Optimization Assistant. I have ' + recommendations.length + ' active recommendations for your network. How can I help you?', timestamp: new Date() }
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -48,16 +51,28 @@ export default function SupportChat() {
       let needsOperator = false;
 
       if (lowerInput.includes('hello') || lowerInput.includes('hi')) {
-        response = "Greetings! I can help you with ATM status, refill predictions, and route optimization. What would you like to know?";
-      } else if (lowerInput.includes('how to refill') || lowerInput.includes('refill process')) {
-        response = "The refill process is managed through the 'Global HQ' tab. Select a route and dispatch the team. For specific terminal keys, you might need an operator.";
-      } else if (lowerInput.includes('bug') || lowerInput.includes('error') || lowerInput.includes('broken') || lowerInput.includes('security breach') || lowerInput.includes('stolen')) {
+        response = "Greetings! I can help you with ATM status, refill predictions, and route optimization. I currently see " + recommendations.length + " items requiring attention.";
+      } else if (lowerInput.includes('recommendation') || lowerInput.includes('what should i do')) {
+        if (recommendations.length > 0) {
+          response = "Based on current telemetry, my top recommendation is: " + recommendations[0].title + ". " + recommendations[0].description;
+        } else {
+          response = "All systems are currently optimized. No immediate actions are required.";
+        }
+      } else if (lowerInput.includes('atm status')) {
+        const criticalCount = atms.filter(a => a.status === 'critical').length;
+        response = "Out of " + atms.length + " ATMs, " + criticalCount + " are currently at critical cash levels. You should prioritize the refill route generated in Global HQ.";
+      } else if (lowerInput.includes('branch') || lowerInput.includes('excess')) {
+        const excess = branches.filter(b => b.totalCash > b.maxThreshold);
+        if (excess.length > 0) {
+          response = "I have detected excess cash in " + excess.length + " branch(es), specifically " + excess[0].name + ". Recommend a transfer to Central Bank.";
+        } else {
+          response = "All branch liquidity levels are within safe thresholds.";
+        }
+      } else if (lowerInput.includes('bug') || lowerInput.includes('error') || lowerInput.includes('security') || lowerInput.includes('attack')) {
         response = "I have detected a complex issue that requires immediate human intervention. I am alerting the on-call operator right now. Please wait...";
         needsOperator = true;
-      } else if (lowerInput.includes('duration')) {
-        response = "I predict cash durations based on historical withdrawal patterns, day types (like Salary Day), and simulated noise. You can see the depletion curve in the 'Unit Analysis' tab.";
       } else {
-        response = "That's an interesting question. Let me check my knowledge base... Actually, this seems a bit technical. Would you like me to connect you with an operator?";
+        response = "I've analyzed your request. For specific actions, I recommend checking the " + (recommendations.length > 0 ? "Smart Recommendations" : "System Status") + " panel.";
       }
 
       const aiMessage: Message = {

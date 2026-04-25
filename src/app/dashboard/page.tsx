@@ -6,17 +6,22 @@ import DashboardATM from '@/components/DashboardATM';
 import DashboardBank from '@/components/DashboardBank';
 import DashboardGlobal from '@/components/DashboardGlobal';
 import ATMSelector from '@/components/ATMSelector';
-import { LayoutDashboard, Building2, Globe, Cpu, Menu, X, Bell, Search, Sun, Moon, Languages } from 'lucide-react';
+import { useI18n } from '@/context/LanguageContext';
+import Link from 'next/link';
+import { LayoutDashboard, Building2, Globe, Cpu, Menu, X, Bell, Search, Sun, Moon, Languages, Map as MapIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from 'next-themes';
-import { useI18n } from '@/context/LanguageContext';
+import { useBank } from '@/context/BankContext';
+import NotificationDropdown from '@/components/NotificationDropdown';
 
 export default function Home() {
   const { theme, setTheme } = useTheme();
   const { t, language, setLanguage } = useI18n();
+  const { atms, notifications } = useBank();
   const [activeTab, setActiveTab] = useState<'atm' | 'bank' | 'global'>('atm');
   const [selectedAtmId, setSelectedAtmId] = useState(atms[0].id);
   const [isSidebarOpen, setSidebarOpen] = useState(true);
+  const [isNotificationsOpen, setNotificationsOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -29,7 +34,9 @@ export default function Home() {
     { id: 'global', label: t('globalHq'), icon: Globe, color: 'text-purple-400' },
   ] as const;
 
-  const currentAtm = useMemo(() => atms.find(a => a.id === selectedAtmId) || atms[0], [selectedAtmId]);
+  const currentAtm = useMemo(() => atms.find(a => a.id === selectedAtmId) || atms[0], [selectedAtmId, atms]);
+
+  const unreadCount = notifications.filter(n => !n.isRead).length;
 
   if (!mounted) return null;
 
@@ -53,8 +60,19 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="flex-1 overflow-hidden">
-          <ATMSelector atms={atms} selectedId={selectedAtmId} onSelect={setSelectedAtmId} />
+        <div className="flex-1 overflow-hidden flex flex-col">
+          <div className="p-4 space-y-2">
+            <Link 
+              href="/live-routing"
+              className="w-full flex items-center space-x-3 p-3 rounded-xl bg-muted/40 border border-transparent hover:border-accent hover:bg-accent/5 text-muted-foreground hover:text-accent transition-all group"
+            >
+              <MapIcon size={20} className="group-hover:scale-110 transition-transform" />
+              <span className="text-sm font-bold truncate">Live Monitoring & Routing</span>
+            </Link>
+          </div>
+          <div className="flex-1 overflow-hidden">
+            <ATMSelector atms={atms} selectedId={selectedAtmId} onSelect={setSelectedAtmId} />
+          </div>
         </div>
 
         <div className="p-4 border-t border-sidebar-border">
@@ -122,10 +140,18 @@ export default function Home() {
               {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
             </button>
 
-            <button className="relative p-2 hover:bg-muted rounded-xl border border-border transition-all text-muted-foreground">
-              <Bell size={18} />
-              <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-background"></span>
-            </button>
+            <div className="relative">
+              <button 
+                onClick={() => setNotificationsOpen(!isNotificationsOpen)}
+                className={`relative p-2 hover:bg-muted rounded-xl border transition-all ${isNotificationsOpen ? 'border-blue-500 bg-blue-500/5 text-blue-500' : 'border-border text-muted-foreground'}`}
+              >
+                <Bell size={18} />
+                {unreadCount > 0 && (
+                  <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-background"></span>
+                )}
+              </button>
+              <NotificationDropdown isOpen={isNotificationsOpen} onClose={() => setNotificationsOpen(false)} />
+            </div>
           </div>
         </header>
 

@@ -52,6 +52,12 @@ export default function ATMSelector({ atms, selectedId, onSelect }: ATMSelectorP
                 <MapPin size={10} className="mr-1" />
                 <span className="truncate">{atm.location.split(',')[0]}</span>
               </div>
+              <div className="mt-2 h-1 w-full bg-muted rounded-full overflow-hidden">
+                <div 
+                  className={`h-full rounded-full ${atm.status === 'critical' ? 'bg-red-500' : atm.status === 'warning' ? 'bg-yellow-500' : 'bg-emerald-500'}`}
+                  style={{ width: `${(atm.currentCash / atm.capacity) * 100}%` }}
+                ></div>
+              </div>
             </div>
           </motion.button>
         ))}

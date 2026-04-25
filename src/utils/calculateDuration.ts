@@ -24,7 +24,7 @@ export function calculateDuration(
 
   // Use a fixed start time for SSR stability, then adjust on client if needed
   // But for MVP, just using a stable calculation is better.
-  const refillTime = new Date('2026-04-26T12:00:00Z'); // Stable date for SSR
+  const refillTime = new Date();
   refillTime.setHours(refillTime.getHours() + finalDuration);
 
   const confidenceRange: [number, number] = [
@@ -40,7 +40,7 @@ export function calculateDuration(
     const remaining = Math.max(0, amount - (hourlyRate * i * (1 + hourlyNoise)));
     
     // Stable time labels
-    const timeLabel = new Date('2026-04-26T00:00:00Z');
+    const timeLabel = new Date();
     timeLabel.setHours(timeLabel.getHours() + i);
     
     depletionData.push({

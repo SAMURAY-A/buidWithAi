@@ -41,6 +41,12 @@ export const translations = {
     costReduction: "Cost Reduction",
     criticalAlerts: "Critical Alerts",
     hqMetrics: "HQ Metrics",
+    centralBank: "Central Bank",
+    securityHub: "Cybersecurity Hub",
+    aiAssistant: "AI Recommendations",
+    executeStrategy: "Execute Strategy",
+    efficiency: "Efficiency",
+    fuelSaving: "Fuel Saving",
   },
   uz: {
     title: "ATM OPTIMIZATORI AI",
@@ -84,6 +90,12 @@ export const translations = {
     costReduction: "Xarajatlarni Kamaytirish",
     criticalAlerts: "Muhim Ogohlantirishlar",
     hqMetrics: "HQ Metrikalari",
+    centralBank: "Markaziy Bank",
+    securityHub: "Kiberxavfsizlik Markazi",
+    aiAssistant: "AI Tavsiyalari",
+    executeStrategy: "Strategiyani Amalga Oshirish",
+    efficiency: "Samaradorlik",
+    fuelSaving: "Yoqilg'i Tejash",
   },
   ru: {
     title: "ATM ОПТИМИЗАТОР AI",
@@ -127,5 +139,11 @@ export const translations = {
     costReduction: "Сокращение Затрат",
     criticalAlerts: "Критические Оповещения",
     hqMetrics: "Метрики HQ",
+    centralBank: "Центральный Банк",
+    securityHub: "Центр Кибербезопасности",
+    aiAssistant: "AI Рекомендации",
+    executeStrategy: "Выполнить Стратегию",
+    efficiency: "Эффективность",
+    fuelSaving: "Экономия Топлива",
   }
 };

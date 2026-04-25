@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "next-themes";
 import { LanguageProvider } from "@/context/LanguageContext";
+import { BankProvider } from "@/context/BankContext";
 import SupportChat from "@/components/SupportChat";
 
 
@@ -31,8 +32,10 @@ export default function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <ThemeProvider attribute="data-theme" defaultTheme="dark" enableSystem={false}>
           <LanguageProvider>
-            {children}
-            <SupportChat />
+            <BankProvider>
+              {children}
+              <SupportChat />
+            </BankProvider>
           </LanguageProvider>
         </ThemeProvider>
       </body>
