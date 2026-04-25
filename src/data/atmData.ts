@@ -18,7 +18,7 @@ export const atms: ATM[] = [
     location: 'Bunyodkor Ave, Tashkent',
     type: 'residential',
     coordinates: [41.2827, 69.2041],
-    currentCash: 45000000,
+    currentCash: 450000000,
     capacity: 100000000,
     lastRefill: '2026-04-24T10:00:00Z',
     status: 'online',
