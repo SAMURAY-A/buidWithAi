@@ -1,127 +1,98 @@
-# ATM Optimizer AI — Enterprise Dashboard
+# ATM Optimizer AI 🤖🏦
 
-A high-fidelity, predictive cash management and logistics optimization platform for banking networks. This project is a Next.js frontend built to demonstrate AI-powered ATM liquidity forecasting and intelligent route planning.
+backend githubLink =https://github.com/Abdumalik-ProDev/ATM-OPT
 
----
+An advanced, AI-powered cash management and logistics optimization platform built for modern banking infrastructure. Designed to solve the critical problem of ATM cash depletion, inefficient logistics, and idle capital through real-time monitoring and predictive modeling.
 
-## 🚀 Overview for Backend Developers
+## 🌟 Key Features
 
-This repository contains the frontend implementation of the ATM Optimizer. It simulates complex data processing and AI predictions currently handled by mock utilities. Your role will be to replace these mocks with robust RESTful or GraphQL APIs.
+*   **🔮 Predictive Cash Modeling (Unit Analysis):**
+    *   Simulates cash depletion based on historical data, day type (weekday, weekend, salary day), and time of day.
+    *   Provides actionable "Optimal Refill Windows" to prevent ATMs from running out of cash.
+*   **🏦 Smart Branch Flow & Capital Redistribution:**
+    *   Monitors live liquidity across bank branches.
+    *   Auto-detects excess cash and suggests/executes transfers to the Central Bank.
+    *   Calculates real-time incoming/outgoing cash flows and health thresholds.
+*   **🌍 Global Logistics HQ & Route Optimization:**
+    *   Live map displaying network status using custom Leaflet infrastructure.
+    *   Generates optimized routing paths for Cash-in-Transit (CIT) vehicles.
+    *   Calculates total distance, average refill times, and fleet fuel savings.
+*   **🛡️ Cybersecurity Hub:**
+    *   Monitors incoming network requests for malicious activities.
+    *   Auto-blocks recognized threat IPs and logs anomalies.
+*   **💬 Integrated AI Support Assistant:**
+    *   Context-aware AI chat that monitors the system and recommends actions.
+    *   Escalation protocols to human operators when severe anomalies are detected.
+*   **🌐 Full i18n Localization:**
+    *   Complete multilingual support for **Uzbek (UZ)**, **English (EN)**, and **Russian (RU)**.
+*   **📱 Fully Responsive UI:**
+    *   Premium, glassmorphism-inspired design with `framer-motion` animations.
+    *   Flawless experience on desktop, tablet, and mobile devices.
 
-### Key Capabilities
-- **Neural Depletion Forecasting**: Predicts exactly when an ATM will run out of cash based on historical patterns and day types.
-- **Dynamic Routing**: Calculates the most efficient refill sequence using geospatial data.
-- **Smart Redistribution**: Identifies "donor" ATMs (idle cash) and "recipient" ATMs (critical shortage).
-- **AI Support Assistant**: Hybrid AI/Human support chat system with automated escalation.
+## 🛠️ Technology Stack
 
----
+*   **Framework:** [Next.js](https://nextjs.org/) (Turbopack)
+*   **UI Library:** React 18
+*   **Styling:** Tailwind CSS + Vanilla CSS (`globals.css`)
+*   **Animations:** Framer Motion
+*   **Icons:** Lucide React
+*   **Maps:** React Leaflet + OpenStreetMap
+*   **State Management:** React Context API (`BankContext`, `LanguageContext`)
 
-## 🛠 Tech Stack
-
-- **Framework**: Next.js 15+ (App Router)
-- **Styling**: Tailwind CSS 4.0
-- **Animations**: Framer Motion (for smooth transitions and real-time feel)
-- **Mapping**: Leaflet + React-Leaflet (OpenStreetMap)
-- **i18n**: Custom Context-based Internationalization (EN, UZ, RU)
-- **Theme**: Next-Themes (Dark/Light mode support)
-- **Charts**: Recharts (for depletion curves)
-
----
-
-## 📊 Data Structures & API Requirements
-
-The frontend currently relies on `/src/data/atmData.ts` and `/src/data/atmLocations.js`. To integrate a backend, the following schemas are expected:
-
-### 1. ATM Object Schema
-```typescript
-interface ATM {
-  id: string;
-  name: string;
-  location: string;
-  type: 'residential' | 'business' | 'market' | 'industrial';
-  coordinates: [number, number]; // [lat, lng]
-  currentCash: number;
-  capacity: number;
-  lastRefill: string; // ISO Date
-  status: 'online' | 'warning' | 'critical' | 'offline';
-  healthScore: number; // 0-100
-}
-```
-
-### 2. Historical Rates (For AI Model)
-The frontend uses hourly withdrawal rates to simulate depletion.
-```typescript
-interface ATMRate {
-  atm_id: string;
-  day_type: 'weekday' | 'weekend' | 'salary_day';
-  hourly_rate: number; // In millions per hour
-}
-```
-
----
-
-## 🧠 Logic to be Offloaded to Backend
-
-Currently, the frontend performs several calculations that should eventually be handled by the backend/AI service:
-
-1.  **Prediction Engine (`src/utils/calculateDuration.ts`)**:
-    - **Current**: Deterministic calculation with ID-based noise.
-    - **Future**: Should be an API call to a Time-Series Forecasting model (e.g., Prophet or LSTM).
-
-2.  **Route Optimization (`src/utils/buildRoute.js`)**:
-    - **Current**: Simple sort by `predicted_hours_left`.
-    - **Future**: Should implement a Vehicle Routing Problem (VRP) algorithm or Traveling Salesman Problem (TSP) with time windows.
-
-3.  **Support Chat (`src/components/SupportChat.tsx`)**:
-    - **Current**: Keyword-based logic.
-    - **Future**: Integration with an LLM (OpenAI/Gemini) and a WebSocket (Socket.io) for live operator intervention.
-
----
-
-## 🏁 Getting Started
+## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js 18+
-- npm or bun
+Make sure you have Node.js or [Bun](https://bun.sh/) installed on your system.
 
 ### Installation
-```bash
-git clone <repository-url>
-cd buildWithAi
-npm install
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/SAMURAY-A/buidWithAi.git
+   cd buidWithAi
+   ```
+
+2. Install dependencies:
+   ```bash
+   bun install
+   # or npm install / yarn install
+   ```
+
+3. Start the development server:
+   ```bash
+   bun dev
+   # or npm run dev
+   ```
+
+4. Open [http://localhost:3000](http://localhost:3000) in your browser to view the application.
+
+## 📁 Project Structure
+
+```text
+src/
+├── app/                  # Next.js App Router (Dashboard, Live Routing, Layout)
+├── components/           # Reusable UI Components
+│   ├── LiveRouting/      # Map routing and list logic
+│   ├── DashboardATM.tsx  # Unit Analysis view
+│   ├── DashboardBank.tsx # Branch Flow view
+│   ├── DashboardGlobal.tsx # Global HQ view
+│   ├── SupportChat.tsx   # AI Assistant
+│   └── ...
+├── context/              # Global State (BankContext, LanguageContext)
+├── data/                 # Mock Data & Telemetry (atmLocations.js, atmData.ts)
+├── i18n/                 # Localization dictionaries (translations.ts)
+└── utils/                # Helper functions (calculateDuration, buildRoute)
 ```
 
-### Development
-```bash
-npm run dev
-# Dashboard is available on http://localhost:3000
-```
+## 🎯 Hackathon Highlights
+This project was specifically engineered to demonstrate:
+1.  **Problem-Solution Fit:** Directly addresses idle capital and ATM downtime.
+2.  **Innovation:** Uses simulated predictive AI models for localized cash burning rates.
+3.  **Feasibility:** Built entirely with modern web technologies capable of easily hooking up to a real Banking API.
+4.  **UX/UI:** State-of-the-art interface designed for clarity, impact, and aesthetic appeal.
 
-### Build
-```bash
-npm run build
-```
+## 🤝 Contributing
+Contributions, issues, and feature requests are welcome!
 
----
-
-## 📂 Project Structure
-
-- `src/app/`: Next.js App Router (Pages: Home, Login, Dashboard, Live-Routing).
-- `src/components/`: Reusable UI components.
-  - `LiveRouting/`: Specific components for the 20/80 map dashboard.
-- `src/context/`: Language and Theme providers.
-- `src/i18n/`: Translation dictionaries.
-- `src/utils/`: Mock algorithms and helper functions.
-
----
-
-## 📍 Future Integration Points (TODO)
-
-- [ ] **Auth**: Replace `localStorage` mock with JWT/NextAuth.
-- [ ] **Real Map Data**: Integrate a routing engine (e.g., OSRM or Google Distance Matrix).
-- [ ] **WebSockets**: Implement real-time "Unit Health" updates.
-- [ ] **Database**: Migrate from static JSON to PostgreSQL/MongoDB.
-
----
-
-**Developed for the Global Banking Solutions Hackathon 2026.**
+## 📝 License
+This project is licensed under the MIT License.
