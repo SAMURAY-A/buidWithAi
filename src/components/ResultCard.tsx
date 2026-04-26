@@ -87,14 +87,14 @@ export default function ResultCard({ prediction }: ResultCardProps) {
         </div>
         <div className="flex items-center space-x-8">
            <div>
-              <div className="text-[10px] uppercase font-black opacity-50 mb-1">Demand Trend</div>
+              <div className="text-[10px] uppercase font-black opacity-50 mb-1">{t('demandTrend')}</div>
               <div className="flex items-center text-xs font-bold">
                  <TrendingDown size={14} className="mr-1 rotate-180" />
                  UPWARD (+12%)
               </div>
            </div>
            <div>
-              <div className="text-[10px] uppercase font-black opacity-50 mb-1">Health Check</div>
+              <div className="text-[10px] uppercase font-black opacity-50 mb-1">{t('healthCheck')}</div>
               <div className="flex items-center text-xs font-bold">
                  <CheckCircle2 size={14} className="mr-1" />
                  STABLE

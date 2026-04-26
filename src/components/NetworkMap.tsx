@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { ATM } from '../data/atmData';
 import 'leaflet/dist/leaflet.css';
+import { useI18n } from '@/context/LanguageContext';
 
 // Dynamically import Leaflet components to avoid SSR issues
 const MapContainer = dynamic(() => import('react-leaflet').then(mod => mod.MapContainer), { ssr: false });
@@ -12,7 +13,6 @@ const Marker = dynamic(() => import('react-leaflet').then(mod => mod.Marker), { 
 const Popup = dynamic(() => import('react-leaflet').then(mod => mod.Popup), { ssr: false });
 
 // We need a helper to get the hooks after the component is mounted
-// We'll use a standard import for hooks and types, but only use them in the sub-component
 import { useMap } from 'react-leaflet';
 
 interface NetworkMapProps {
@@ -21,9 +21,9 @@ interface NetworkMapProps {
   onSelect?: (id: string) => void;
 }
 
-// Map Controller to handle centering - this component MUST be inside MapContainer
+// Map Controller to handle centering
 function MapController({ center, zoom }: { center: [number, number], zoom: number }) {
-  const map = useMap(); // This is now a standard hook call
+  const map = useMap();
   
   useEffect(() => {
     if (map) {
@@ -35,12 +35,12 @@ function MapController({ center, zoom }: { center: [number, number], zoom: numbe
 }
 
 export default function NetworkMap({ atms, selectedId, onSelect }: NetworkMapProps) {
+  const { t } = useI18n();
   const [isMounted, setIsMounted] = useState(false);
   const [L, setL] = useState<any>(null);
 
   useEffect(() => {
     setIsMounted(true);
-    // Standard Leaflet import for client-side only
     import('leaflet').then(leaflet => {
       setL(leaflet.default);
     });
@@ -55,12 +55,11 @@ export default function NetworkMap({ atms, selectedId, onSelect }: NetworkMapPro
     return (
       <div className="w-full h-full bg-slate-900 animate-pulse flex flex-col items-center justify-center text-slate-500 font-bold uppercase tracking-[0.2em] gap-4">
         <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-        Initializing Map System...
+        {t('initializingMap')}
       </div>
     );
   }
 
-  // Custom Icon Logic
   const getIcon = (status: string, isSelected: boolean) => {
     const color = isSelected ? '#3b82f6' : (status === 'critical' ? '#ef4444' : status === 'warning' ? '#f59e0b' : '#10b981');
     const size = isSelected ? 32 : 24;
@@ -107,7 +106,7 @@ export default function NetworkMap({ atms, selectedId, onSelect }: NetworkMapPro
                 
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-[10px] font-black uppercase">
-                    <span className="text-slate-400">Cash Level:</span>
+                    <span className="text-slate-400">{t('cashLevel')}:</span>
                     <span className={atm.status === 'critical' ? 'text-red-600' : 'text-emerald-600'}>
                       UZS {Math.round(atm.currentCash / 1000000)}M
                     </span>
@@ -119,8 +118,8 @@ export default function NetworkMap({ atms, selectedId, onSelect }: NetworkMapPro
                     ></div>
                   </div>
                   <div className="flex items-center justify-between text-[9px] font-bold text-slate-400 uppercase">
-                    <span>Depletion:</span>
-                    <span>{atm.predicted_depletion_time?.toFixed(1)} hours</span>
+                    <span>{t('depletion')}:</span>
+                    <span>{atm.predicted_depletion_time?.toFixed(1)} {t('hours')}</span>
                   </div>
                 </div>
               </div>
@@ -133,22 +132,22 @@ export default function NetworkMap({ atms, selectedId, onSelect }: NetworkMapPro
         <div className="bg-slate-900/90 backdrop-blur-xl p-4 rounded-2xl border border-slate-800 flex flex-col gap-2.5 shadow-2xl">
            <div className="flex items-center gap-3">
               <div className="w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]"></div>
-              <span className="text-[9px] text-slate-300 font-black uppercase tracking-widest">Critical Level</span>
+              <span className="text-[9px] text-slate-300 font-black uppercase tracking-widest">{t('criticalLevel')}</span>
            </div>
            <div className="flex items-center gap-3">
               <div className="w-2.5 h-2.5 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]"></div>
-              <span className="text-[9px] text-slate-300 font-black uppercase tracking-widest">Warning Zone</span>
+              <span className="text-[9px] text-slate-300 font-black uppercase tracking-widest">{t('warningZone')}</span>
            </div>
            <div className="flex items-center gap-3">
               <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
-              <span className="text-[9px] text-slate-300 font-black uppercase tracking-widest">Optimal State</span>
+              <span className="text-[9px] text-slate-300 font-black uppercase tracking-widest">{t('optimalState')}</span>
            </div>
         </div>
       </div>
 
       <div className="absolute bottom-6 left-6 z-[1000] bg-blue-600/90 backdrop-blur-xl px-4 py-2 rounded-xl border border-blue-400/50 text-[10px] text-white uppercase tracking-[0.2em] font-black shadow-2xl shadow-blue-500/20 flex items-center gap-3">
         <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-        Live Network Monitoring • {atms.length} Units Active
+        {t('liveNetworkMonitoring')} • {atms.length} {t('unitsActive')}
       </div>
     </div>
   );

@@ -31,7 +31,7 @@ export default function InputPanel({ cashAmount, setCashAmount, dayType, setDayT
             value={cashAmount}
             onChange={(e) => setCashAmount(Number(e.target.value))}
             className="w-full glass-input rounded-2xl px-5 py-4 text-xl font-black text-foreground focus:outline-none placeholder-muted-foreground/30"
-            placeholder="e.g. 100"
+            placeholder={t('describeIssue')}
           />
         </div>
         <div className="flex flex-wrap gap-2">

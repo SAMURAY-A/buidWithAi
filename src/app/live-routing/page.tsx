@@ -18,6 +18,9 @@ export default function LiveRoutingRoute() {
 
   useEffect(() => {
     setMounted(true);
+    if (window.innerWidth < 768) {
+      setSidebarOpen(false);
+    }
   }, []);
 
   if (!mounted) return null;
@@ -30,7 +33,7 @@ export default function LiveRoutingRoute() {
       <motion.aside 
         initial={false}
         animate={{ width: isSidebarOpen ? 280 : 0, opacity: isSidebarOpen ? 1 : 0 }}
-        className="relative h-full bg-sidebar backdrop-blur-3xl border-r border-sidebar-border flex flex-col z-40 overflow-hidden transition-colors"
+        className="absolute md:relative h-full bg-sidebar backdrop-blur-3xl border-r border-sidebar-border flex flex-col z-50 overflow-hidden transition-colors"
       >
         <div className="p-6 h-20 flex items-center border-b border-sidebar-border">
           <div className="flex items-center space-x-3">
@@ -44,22 +47,22 @@ export default function LiveRoutingRoute() {
         <div className="flex-1 p-4 space-y-2">
            <Link href="/dashboard" className="flex items-center space-x-3 p-3 rounded-xl text-muted-foreground hover:bg-muted transition-colors">
               <LayoutDashboard size={20} />
-              <span className="text-sm font-bold">Dashboard</span>
+              <span className="text-sm font-bold">{t('dashboard')}</span>
            </Link>
            <div className="flex items-center space-x-3 p-3 rounded-xl bg-accent/10 border border-accent text-accent shadow-lg shadow-accent/10">
               <MapIcon size={20} />
-              <span className="text-sm font-bold">Live Monitoring</span>
+              <span className="text-sm font-bold">{t('liveMonitoring')}</span>
            </div>
         </div>
       </motion.aside>
 
       <div className="flex-1 flex flex-col h-full relative overflow-hidden">
-        <header className="h-20 border-b border-border flex items-center justify-between px-8 bg-background/40 backdrop-blur-md z-30 transition-colors">
+        <header className="h-20 border-b border-border flex items-center justify-between px-4 md:px-8 bg-background/40 backdrop-blur-md z-30 transition-colors">
           <div className="flex items-center space-x-6">
             <button onClick={() => setSidebarOpen(!isSidebarOpen)} className="p-2 hover:bg-muted rounded-lg transition-colors text-muted-foreground">
               {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
-            <h2 className="text-lg font-black tracking-tight uppercase">Live Monitoring & Routing</h2>
+            <h2 className="text-lg font-black tracking-tight uppercase">{t('liveMonitoring')}</h2>
           </div>
 
           <div className="flex items-center space-x-4">
@@ -70,8 +73,8 @@ export default function LiveRoutingRoute() {
           </div>
         </header>
 
-        <div className="flex-1 overflow-y-auto custom-scrollbar p-8">
-          <div className="max-w-7xl mx-auto">
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-4 md:p-8">
+          <div className="max-w-7xl mx-auto h-full">
              <LiveRoutingPage />
           </div>
         </div>

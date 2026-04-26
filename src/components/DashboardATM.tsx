@@ -25,6 +25,12 @@ export default function DashboardATM({ selectedAtmId }: DashboardATMProps) {
     return calculateDuration(currentAtm.id, currentAtm.currentCash, dayType);
   }, [currentAtm, dayType]);
 
+  const maintenanceHistory = [
+    { date: '24 Apr', action: t('generalService'), status: t('completed') },
+    { date: '18 Apr', action: t('sensorAlignment'), status: t('completed') },
+    { date: '10 Apr', action: `${t('softwarePatch')} v4.2`, status: t('completed') },
+  ];
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
       <div className="lg:col-span-4 space-y-8">
@@ -52,14 +58,10 @@ export default function DashboardATM({ selectedAtmId }: DashboardATMProps) {
         <div className="glass-card rounded-[32px] p-6 bg-slate-900/20 border-slate-800">
            <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-6 flex items-center gap-2">
              <Clock size={12} className="text-blue-500" />
-             Maintenance History
+             {t('maintenanceHistory')}
            </h4>
            <div className="space-y-4">
-              {[
-                { date: '24 Apr', action: 'General Service', status: 'Completed' },
-                { date: '18 Apr', action: 'Sensor Alignment', status: 'Completed' },
-                { date: '10 Apr', action: 'Software Patch v4.2', status: 'Completed' },
-              ].map((log, i) => (
+              {maintenanceHistory.map((log, i) => (
                 <div key={i} className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="text-[10px] font-bold text-slate-500 w-10">{log.date}</div>

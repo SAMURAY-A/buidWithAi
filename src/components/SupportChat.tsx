@@ -3,6 +3,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageSquare, Send, X, Bot, User, ShieldAlert, Cpu, Sparkles, Loader2 } from 'lucide-react';
+import { useBank } from '@/context/BankContext';
+import { useI18n } from '@/context/LanguageContext';
 
 interface Message {
   id: string;
@@ -11,18 +13,27 @@ interface Message {
   timestamp: Date;
 }
 
-import { useBank } from '@/context/BankContext';
-
 export default function SupportChat() {
+  const { t } = useI18n();
   const { recommendations, atms, branches } = useBank();
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([
-    { id: '1', role: 'ai', text: 'Hello! I am your ATM Optimization Assistant. I have ' + recommendations.length + ' active recommendations for your network. How can I help you?', timestamp: new Date() }
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [isOperatorAlerted, setIsOperatorAlerted] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Initialize with translated message
+  useEffect(() => {
+    setMessages([
+      { 
+        id: '1', 
+        role: 'ai', 
+        text: `${t('greetingMsg')} ${t('greetingDetailed')}`, 
+        timestamp: new Date() 
+      }
+    ]);
+  }, [t]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -44,35 +55,35 @@ export default function SupportChat() {
     setInputValue('');
     setIsTyping(true);
 
-    // AI Logic Simulation
+    // AI Logic Simulation with translations
     setTimeout(() => {
       const lowerInput = userMessage.text.toLowerCase();
       let response = "";
       let needsOperator = false;
 
-      if (lowerInput.includes('hello') || lowerInput.includes('hi')) {
-        response = "Greetings! I can help you with ATM status, refill predictions, and route optimization. I currently see " + recommendations.length + " items requiring attention.";
-      } else if (lowerInput.includes('recommendation') || lowerInput.includes('what should i do')) {
+      if (lowerInput.includes('hello') || lowerInput.includes('hi') || lowerInput.includes('salom')) {
+        response = `${t('greetingMsg')} ${t('greetingDetailed')}`;
+      } else if (lowerInput.includes('recommendation') || lowerInput.includes('tavsiya') || lowerInput.includes('sovet')) {
         if (recommendations.length > 0) {
-          response = "Based on current telemetry, my top recommendation is: " + recommendations[0].title + ". " + recommendations[0].description;
+          response = `${t('topRecommendation')} ${recommendations[0].title}. ${recommendations[0].description}`;
         } else {
-          response = "All systems are currently optimized. No immediate actions are required.";
+          response = t('allOptimized');
         }
-      } else if (lowerInput.includes('atm status')) {
+      } else if (lowerInput.includes('atm') || lowerInput.includes('status')) {
         const criticalCount = atms.filter(a => a.status === 'critical').length;
-        response = "Out of " + atms.length + " ATMs, " + criticalCount + " are currently at critical cash levels. You should prioritize the refill route generated in Global HQ.";
-      } else if (lowerInput.includes('branch') || lowerInput.includes('excess')) {
+        response = `${criticalCount} ${t('criticalAtmsCount')}`;
+      } else if (lowerInput.includes('branch') || lowerInput.includes('excess') || lowerInput.includes('filial')) {
         const excess = branches.filter(b => b.totalCash > b.maxThreshold);
         if (excess.length > 0) {
-          response = "I have detected excess cash in " + excess.length + " branch(es), specifically " + excess[0].name + ". Recommend a transfer to Central Bank.";
+          response = t('branchExcessMsg');
         } else {
-          response = "All branch liquidity levels are within safe thresholds.";
+          response = t('branchSafeMsg');
         }
-      } else if (lowerInput.includes('bug') || lowerInput.includes('error') || lowerInput.includes('security') || lowerInput.includes('attack')) {
-        response = "I have detected a complex issue that requires immediate human intervention. I am alerting the on-call operator right now. Please wait...";
+      } else if (lowerInput.includes('bug') || lowerInput.includes('error') || lowerInput.includes('security') || lowerInput.includes('xavf')) {
+        response = t('securityAlertMsg');
         needsOperator = true;
       } else {
-        response = "I've analyzed your request. For specific actions, I recommend checking the " + (recommendations.length > 0 ? "Smart Recommendations" : "System Status") + " panel.";
+        response = t('genericAiResponse');
       }
 
       const aiMessage: Message = {
@@ -91,7 +102,7 @@ export default function SupportChat() {
           const operatorMessage: Message = {
             id: (Date.now() + 2).toString(),
             role: 'operator',
-            text: "Hello, I am Operator #104. I've been alerted to your issue regarding '" + userMessage.text + "'. How can I resolve this for you manually?",
+            text: t('operatorMsg'),
             timestamp: new Date()
           };
           setMessages(prev => [...prev, operatorMessage]);
@@ -102,7 +113,6 @@ export default function SupportChat() {
 
   return (
     <>
-      {/* Floating Toggle Button */}
       <motion.button
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
@@ -120,7 +130,6 @@ export default function SupportChat() {
             exit={{ opacity: 0, y: 100, scale: 0.8 }}
             className="fixed bottom-28 right-8 w-[400px] h-[600px] glass-card rounded-[32px] flex flex-col z-[100] shadow-[0_20px_60px_rgba(0,0,0,0.4)] overflow-hidden"
           >
-            {/* Header */}
             <div className="p-6 border-b border-border bg-accent/5 backdrop-blur-md">
                <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
@@ -128,23 +137,22 @@ export default function SupportChat() {
                         <Cpu size={20} />
                      </div>
                      <div>
-                        <div className="text-sm font-black tracking-tight">AI Assistant</div>
+                        <div className="text-sm font-black tracking-tight">{t('aiAssistantTitle')}</div>
                         <div className="flex items-center text-[10px] text-emerald-500 font-bold uppercase tracking-widest">
                            <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-1.5 animate-pulse"></div>
-                           Always Online
+                           {t('alwaysOnline')}
                         </div>
                      </div>
                   </div>
                   {isOperatorAlerted && (
                     <div className="flex items-center space-x-2 px-3 py-1 bg-red-500/10 border border-red-500/20 rounded-full animate-bounce">
                        <ShieldAlert size={12} className="text-red-500" />
-                       <span className="text-[10px] font-black text-red-500 uppercase">Operator Alerted</span>
+                       <span className="text-[10px] font-black text-red-500 uppercase">{t('operatorAlerted')}</span>
                     </div>
                   )}
                </div>
             </div>
 
-            {/* Messages Area */}
             <div 
               ref={scrollRef}
               className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar"
@@ -189,7 +197,6 @@ export default function SupportChat() {
               )}
             </div>
 
-            {/* Input Area */}
             <div className="p-6 border-t border-border bg-background/50">
                <div className="relative">
                   <input
@@ -197,7 +204,7 @@ export default function SupportChat() {
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-                    placeholder="Describe your issue..."
+                    placeholder={t('describeIssue')}
                     className="w-full glass-input rounded-2xl pl-4 pr-12 py-4 text-xs font-bold focus:outline-none"
                   />
                   <button 
@@ -209,7 +216,7 @@ export default function SupportChat() {
                </div>
                <div className="mt-4 flex items-center justify-center space-x-4 opacity-30">
                   <div className="flex items-center text-[10px] font-black uppercase">
-                     <Sparkles size={10} className="mr-1" /> Powered by AI Core
+                     <Sparkles size={10} className="mr-1" /> {t('poweredByAi')}
                   </div>
                </div>
             </div>

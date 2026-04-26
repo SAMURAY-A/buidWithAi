@@ -58,7 +58,7 @@ export default function DashboardBank() {
           <div className="text-4xl font-black text-foreground mb-2">{(centralBankCash / 1000000000).toFixed(2)}B <span className="text-sm font-bold text-muted-foreground">UZS</span></div>
           <div className="flex items-center text-xs font-bold text-emerald-500">
             <ChevronUp size={14} className="mr-1" />
-            +{(centralBankTransfers.reduce((a,b)=>a+b.amount, 0)/1000000).toFixed(1)}M today
+            +{(centralBankTransfers.reduce((a,b)=>a+b.amount, 0)/1000000).toFixed(1)}M {t('now').toLowerCase()}
           </div>
         </motion.div>
 
@@ -91,7 +91,7 @@ export default function DashboardBank() {
               {t('branchFlow')}
             </h3>
             <div className="flex space-x-2">
-              <span className="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-500 text-[10px] font-black uppercase tracking-widest border border-emerald-500/20">Online</span>
+              <span className="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-500 text-[10px] font-black uppercase tracking-widest border border-emerald-500/20">{t('online')}</span>
             </div>
           </div>
 
@@ -114,9 +114,9 @@ export default function DashboardBank() {
                       <div>
                         <h4 className="font-bold text-foreground">{branch.name}</h4>
                         <div className="flex items-center space-x-2 mt-1">
-                          <span className="text-[10px] text-slate-500 uppercase tracking-tighter">ID: {branch.id}</span>
+                          <span className="text-[10px] text-slate-500 uppercase tracking-tighter">{t('atmId')}: {branch.id}</span>
                           <span className="w-1 h-1 bg-slate-700 rounded-full"></span>
-                          <span className="text-[10px] text-slate-500 uppercase tracking-tighter">Current: {(branch.totalCash / 1000000).toFixed(1)}M UZS</span>
+                          <span className="text-[10px] text-slate-500 uppercase tracking-tighter">{t('now')}: {(branch.totalCash / 1000000).toFixed(1)}M UZS</span>
                         </div>
                       </div>
                     </div>
@@ -153,19 +153,19 @@ export default function DashboardBank() {
 
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 pt-6 border-t border-slate-800">
                     <div>
-                      <div className="text-[9px] text-slate-500 uppercase font-bold tracking-widest mb-1">{t('incoming')} / hr</div>
+                      <div className="text-[9px] text-slate-500 uppercase font-bold tracking-widest mb-1">{t('incoming')} / {t('hours').charAt(0)}</div>
                       <div className="text-xs font-bold text-emerald-500">+{(branch.incomingCash / 1000000).toFixed(1)}M</div>
                     </div>
                     <div>
-                      <div className="text-[9px] text-slate-500 uppercase font-bold tracking-widest mb-1">{t('outgoing')} / hr</div>
+                      <div className="text-[9px] text-slate-500 uppercase font-bold tracking-widest mb-1">{t('outgoing')} / {t('hours').charAt(0)}</div>
                       <div className="text-xs font-bold text-red-500">-{(branch.outgoingCash / 1000000).toFixed(1)}M</div>
                     </div>
                     <div>
-                      <div className="text-[9px] text-slate-500 uppercase font-bold tracking-widest mb-1">Status</div>
+                      <div className="text-[9px] text-slate-500 uppercase font-bold tracking-widest mb-1">{t('status')}</div>
                       <div className={`text-xs font-bold ${isExcess ? 'text-red-500' : 'text-emerald-500'}`}>{isExcess ? t('excessAlert') : t('normal')}</div>
                     </div>
                     <div>
-                      <div className="text-[9px] text-slate-500 uppercase font-bold tracking-widest mb-1">Health</div>
+                      <div className="text-[9px] text-slate-500 uppercase font-bold tracking-widest mb-1">{t('health')}</div>
                       <div className="text-xs font-bold text-blue-500">99.9%</div>
                     </div>
                   </div>
@@ -190,7 +190,7 @@ export default function DashboardBank() {
                     <div>
                       <p className="text-xs font-bold uppercase tracking-tight mb-1">{t('excessCashDetected')}</p>
                       <p className="text-[10px] leading-relaxed opacity-80">
-                        {excessBranches.length} branch(es) exceed limits. Fix recommended.
+                        {excessBranches.length} {t('branchStatus').toLowerCase()} {t('excessAlert').toLowerCase()}.
                       </p>
                     </div>
                   </div>
@@ -200,9 +200,9 @@ export default function DashboardBank() {
                   <div className="flex items-start space-x-3">
                     <Zap size={18} className="mt-0.5 shrink-0" />
                     <div>
-                      <p className="text-xs font-bold uppercase tracking-tight mb-1">System Balanced</p>
+                      <p className="text-xs font-bold uppercase tracking-tight mb-1">{t('systemBalanced')}</p>
                       <p className="text-[10px] leading-relaxed opacity-80">
-                        All branches are within operational thresholds.
+                        {t('allBranchesNormal')}
                       </p>
                     </div>
                   </div>
@@ -236,7 +236,7 @@ export default function DashboardBank() {
               {centralBankTransfers.length === 0 ? (
                 <div className="text-center py-10 opacity-20">
                    <ArrowDownToLine size={24} className="mx-auto mb-2" />
-                   <p className="text-[10px] font-bold uppercase tracking-widest">No Transfers Yet</p>
+                   <p className="text-[10px] font-bold uppercase tracking-widest">{t('noTransfers')}</p>
                 </div>
               ) : (
                 centralBankTransfers.map(transfer => (

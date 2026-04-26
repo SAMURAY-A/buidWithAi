@@ -71,7 +71,7 @@ export default function CriticalATMList({ onSelect, selectedId }: CriticalATMLis
 
                 <div className="mt-3">
                   <div className="flex items-center justify-between text-[8px] font-black uppercase mb-1">
-                    <span className="text-slate-500">Current Load</span>
+                    <span className="text-slate-500">{t('currentLoad')}</span>
                     <span className={isCritical ? 'text-red-500' : 'text-amber-500'}>{percentage}%</span>
                   </div>
                   <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">

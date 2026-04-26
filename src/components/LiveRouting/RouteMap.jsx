@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useTheme } from 'next-themes';
 import 'leaflet/dist/leaflet.css';
+import { useI18n } from '@/context/LanguageContext';
 
 // Dynamically import Leaflet components to avoid SSR issues
 const MapContainer = dynamic(() => import('react-leaflet').then(mod => mod.MapContainer), { ssr: false });
@@ -25,6 +26,7 @@ function MapController({ center, zoom }) {
 }
 
 export default function RouteMap({ atms, selectedId, onSelect, route }) {
+  const { t } = useI18n();
   const { theme } = useTheme();
   const [isMounted, setIsMounted] = useState(false);
   const [L, setL] = useState(null);
@@ -37,7 +39,11 @@ export default function RouteMap({ atms, selectedId, onSelect, route }) {
   }, []);
 
   if (!isMounted || !L) {
-    return <div className="w-full h-full bg-slate-900 animate-pulse rounded-3xl flex items-center justify-center text-slate-500 font-black uppercase tracking-widest">Loading Route Infrastructure...</div>;
+    return (
+      <div className="w-full h-full bg-slate-900 animate-pulse rounded-3xl flex items-center justify-center text-slate-500 font-black uppercase tracking-widest">
+        {t('loadingRoute')}
+      </div>
+    );
   }
 
   const selectedAtm = atms.find(a => a.id === selectedId);
@@ -106,7 +112,7 @@ export default function RouteMap({ atms, selectedId, onSelect, route }) {
               <div className="p-2 min-w-[150px]">
                 <div className="text-sm font-black text-slate-900 uppercase tracking-tight mb-1">{atm.name.split('—')[1] || atm.name}</div>
                 <div className="flex items-center justify-between">
-                   <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">{atm.predicted_hours_left} Hours Left</span>
+                   <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">{atm.predicted_hours_left} {t('hours')} {t('left')}</span>
                    <div className={`w-2 h-2 rounded-full ${atm.status === 'critical' ? 'bg-red-500 animate-pulse' : 'bg-emerald-500'}`}></div>
                 </div>
               </div>
@@ -120,7 +126,7 @@ export default function RouteMap({ atms, selectedId, onSelect, route }) {
             color: '#3b82f6', 
             weight: 5, 
             opacity: 0.8,
-            dashArray: '12, 12',
+            dashArray: '12, 12', 
             lineJoin: 'round'
           }}
         />
@@ -128,25 +134,25 @@ export default function RouteMap({ atms, selectedId, onSelect, route }) {
 
       {/* Floating Legend */}
       <div className="absolute bottom-6 left-6 bg-slate-900/90 backdrop-blur-xl px-6 py-4 rounded-[20px] border border-slate-800 z-[1000] shadow-2xl pointer-events-none">
-         <div className="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-3">Refill Route Logistics</div>
+         <div className="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-3">{t('logisticsMatrix')}</div>
          <div className="flex items-center space-x-6">
             <div className="flex items-center space-x-2">
                <div className="w-2.5 h-2.5 rounded-full bg-red-500"></div>
-               <span className="text-[10px] text-slate-300 font-black uppercase">Critical</span>
+               <span className="text-[10px] text-slate-300 font-black uppercase">{t('high')}</span>
             </div>
             <div className="flex items-center space-x-2">
                <div className="w-2.5 h-2.5 rounded-full bg-amber-500"></div>
-               <span className="text-[10px] text-slate-300 font-black uppercase">Warning</span>
+               <span className="text-[10px] text-slate-300 font-black uppercase">{t('medium')}</span>
             </div>
             <div className="flex items-center space-x-2">
                <div className="w-2.5 h-2.5 rounded-full bg-emerald-500"></div>
-               <span className="text-[10px] text-slate-300 font-black uppercase">Normal</span>
+               <span className="text-[10px] text-slate-300 font-black uppercase">{t('stable')}</span>
             </div>
          </div>
       </div>
 
       <div className="absolute top-6 left-6 z-[1000] bg-blue-600 px-4 py-2 rounded-xl text-[10px] font-black text-white uppercase tracking-widest shadow-xl shadow-blue-500/20">
-         Optimal Refill Path Active
+         {t('optimalRefillPath')}
       </div>
     </div>
   );

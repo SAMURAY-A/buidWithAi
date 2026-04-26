@@ -18,7 +18,7 @@ export default function ATMSelector({ atms, selectedId, onSelect }: ATMSelectorP
     <div className="flex flex-col h-full bg-sidebar">
       <div className="p-6 border-b border-sidebar-border">
         <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-[0.2em]">{t('selectAtm')}</h3>
-        <p className="text-[10px] text-muted-foreground/60 mt-1 uppercase tracking-wider">{atms.length} units</p>
+        <p className="text-[10px] text-muted-foreground/60 mt-1 uppercase tracking-wider">{atms.length} {t('unitsActive')}</p>
       </div>
       
       <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-3">

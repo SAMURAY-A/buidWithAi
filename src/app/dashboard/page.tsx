@@ -26,6 +26,9 @@ export default function Dashboard() {
 
   useEffect(() => {
     setMounted(true);
+    if (window.innerWidth < 768) {
+      setSidebarOpen(false);
+    }
   }, []);
 
   const tabs = [
@@ -48,7 +51,7 @@ export default function Dashboard() {
       <motion.aside 
         initial={false}
         animate={{ width: isSidebarOpen ? 280 : 0, opacity: isSidebarOpen ? 1 : 0 }}
-        className="relative h-full bg-slate-950/40 backdrop-blur-3xl border-r border-slate-800 flex flex-col z-40 overflow-hidden transition-all"
+        className="absolute md:relative h-full bg-slate-950/95 md:bg-slate-950/40 backdrop-blur-3xl border-r border-slate-800 flex flex-col z-50 overflow-hidden transition-all"
       >
         <div className="p-6 h-20 flex items-center border-b border-slate-800 bg-slate-900/20">
           <div className="flex items-center space-x-3">
@@ -66,7 +69,7 @@ export default function Dashboard() {
               className="w-full flex items-center space-x-3 p-3 rounded-xl bg-blue-500/5 border border-blue-500/10 hover:border-blue-500 hover:bg-blue-500/10 text-slate-400 hover:text-blue-500 transition-all group"
             >
               <MapIcon size={20} className="group-hover:scale-110 transition-transform" />
-              <span className="text-xs font-black uppercase tracking-widest truncate">Live Monitoring</span>
+              <span className="text-xs font-black uppercase tracking-widest truncate">{t('liveMonitoring')}</span>
             </Link>
           </div>
           <div className="flex-1 overflow-hidden">
@@ -79,7 +82,7 @@ export default function Dashboard() {
               <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-xs font-black mr-3 text-white shadow-lg shadow-blue-500/20">SK</div>
               <div className="min-w-0">
                  <div className="text-xs font-black truncate text-slate-100">Samuray Kh.</div>
-                 <div className="text-[9px] text-slate-500 uppercase tracking-widest font-black">Lead AI Architect</div>
+                 <div className="text-[9px] text-slate-500 uppercase tracking-widest font-black">{t('leadAiArchitect')}</div>
               </div>
            </div>
         </div>
@@ -88,7 +91,7 @@ export default function Dashboard() {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col h-full relative overflow-hidden">
         {/* Top Header */}
-        <header className="h-20 border-b border-slate-800 flex items-center justify-between px-8 bg-slate-950/40 backdrop-blur-md z-30 transition-all">
+        <header className="h-20 border-b border-slate-800 flex items-center justify-between px-4 md:px-8 bg-slate-950/40 backdrop-blur-md z-30 transition-all">
           <div className="flex items-center space-x-6">
             <button 
               onClick={() => setSidebarOpen(!isSidebarOpen)}
@@ -97,19 +100,19 @@ export default function Dashboard() {
               {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
             
-            <nav className="flex space-x-1 bg-slate-900/50 p-1 rounded-2xl border border-slate-800">
+            <nav className="flex space-x-1 bg-slate-900/50 p-1 rounded-2xl border border-slate-800 overflow-x-auto max-w-[50vw] md:max-w-none custom-scrollbar">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center px-5 py-2 rounded-xl transition-all text-[10px] font-black tracking-widest uppercase ${
+                  className={`flex items-center px-3 md:px-5 py-2 rounded-xl transition-all text-[10px] font-black tracking-widest uppercase whitespace-nowrap ${
                     activeTab === tab.id
                       ? 'bg-slate-800 text-foreground shadow-xl border border-slate-700'
                       : 'text-slate-500 hover:text-foreground'
                   }`}
                 >
-                  <tab.icon size={14} className={`mr-2 ${activeTab === tab.id ? tab.color : ''}`} />
-                  {tab.label}
+                  <tab.icon size={14} className={`mr-1 md:mr-2 ${activeTab === tab.id ? tab.color : ''}`} />
+                  <span className="hidden sm:inline">{tab.label}</span>
                 </button>
               ))}
             </nav>
@@ -141,8 +144,8 @@ export default function Dashboard() {
         </header>
 
         {/* Scrollable Content Area */}
-        <div className="flex-1 overflow-y-auto custom-scrollbar p-10">
-          <div className="max-w-7xl mx-auto space-y-10 pb-20">
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-4 md:p-10">
+          <div className="max-w-7xl mx-auto space-y-6 md:space-y-10 pb-20">
             <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">
               <div>
                 <div className="flex items-center space-x-2 text-[10px] font-black text-blue-500 uppercase tracking-[0.4em] mb-3">
@@ -153,15 +156,15 @@ export default function Dashboard() {
                   {activeTab === 'atm' ? t('realTimeAnalysis') : activeTab === 'bank' ? t('cashFlowOpt') : t('logisticsHq')}
                 </h2>
                 <p className="text-slate-400 mt-3 text-sm font-medium max-w-2xl leading-relaxed">
-                  {activeTab === 'atm' ? `Deep-dive metrics for ${currentAtm.name}. AI predictive modeling active.` : 
-                   activeTab === 'bank' ? 'Regional liquidity matrix and branch-to-bank capital redistribution flow.' : 
-                   'National logistics oversight, route optimization, and operational cost intelligence.'}
+                  {activeTab === 'atm' ? t('atmMetricsDesc').replace('{name}', currentAtm.name.split('—')[1] || currentAtm.name) : 
+                   activeTab === 'bank' ? t('bankMetricsDesc') : 
+                   t('globalMetricsDesc')}
                 </p>
               </div>
               
-              <div className="flex items-center bg-slate-900/40 backdrop-blur-xl border border-slate-800 rounded-[24px] px-6 py-4 divide-x divide-slate-800 shadow-2xl">
+              <div className="flex items-center bg-slate-900/40 backdrop-blur-xl border border-slate-800 rounded-[24px] px-4 md:px-6 py-4 divide-x divide-slate-800 shadow-2xl mt-4 md:mt-0">
                  <div className="pr-6">
-                    <div className="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1">Network Status</div>
+                    <div className="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1">{t('networkStatus')}</div>
                     <div className="flex items-center space-x-2">
                        <div className="w-2 h-2 bg-emerald-500 rounded-full shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
                        <span className="text-xs font-black text-emerald-500 tracking-wider">{t('stable')}</span>

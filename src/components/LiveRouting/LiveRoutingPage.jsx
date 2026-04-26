@@ -7,8 +7,10 @@ import ATMList from './ATMList';
 import RouteMap from './RouteMap';
 import { motion } from 'framer-motion';
 import { Navigation, Clock, ShieldAlert, TrendingUp } from 'lucide-react';
+import { useI18n } from '@/context/LanguageContext';
 
 export default function LiveRoutingPage() {
+  const { t } = useI18n();
   const [selectedId, setSelectedId] = useState(null);
   
   const sortedAtms = useMemo(() => {
@@ -18,9 +20,9 @@ export default function LiveRoutingPage() {
   const criticalAtm = sortedAtms[0];
 
   return (
-    <div className="flex flex-col lg:flex-row h-[calc(100vh-160px)] gap-6">
+    <div className="flex flex-col lg:flex-row h-auto lg:h-[calc(100vh-160px)] gap-6">
       {/* LEFT SIDE (20%) */}
-      <div className="lg:w-[20%] h-full">
+      <div className="lg:w-[20%] h-[350px] lg:h-full">
         <div className="glass-card h-full rounded-3xl overflow-hidden shadow-2xl transition-colors">
           <ATMList 
             atms={sortedAtms} 
@@ -43,7 +45,7 @@ export default function LiveRoutingPage() {
                 <ShieldAlert size={20} />
               </div>
               <div>
-                <div className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Next Critical</div>
+                <div className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">{t('nextCritical')}</div>
                 <div className="text-sm font-black truncate">{criticalAtm.name.split('—')[1]}</div>
               </div>
            </motion.div>
@@ -58,7 +60,7 @@ export default function LiveRoutingPage() {
                 <Navigation size={20} />
               </div>
               <div>
-                <div className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Route Length</div>
+                <div className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">{t('totalDistance')}</div>
                 <div className="text-sm font-black">5 Stops / 42 km</div>
               </div>
            </motion.div>
@@ -73,14 +75,14 @@ export default function LiveRoutingPage() {
                 <Clock size={20} />
               </div>
               <div>
-                <div className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Est. Duration</div>
-                <div className="text-sm font-black">3.5 Hours Total</div>
+                <div className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">{t('travelTime')}</div>
+                <div className="text-sm font-black">3.5 {t('hours')}</div>
               </div>
            </motion.div>
         </div>
 
         {/* Map View */}
-        <div className="flex-1 min-h-[400px]">
+        <div className="flex-1 min-h-[400px] md:min-h-[500px]">
           <RouteMap 
             atms={atmLocations} 
             selectedId={selectedId} 
