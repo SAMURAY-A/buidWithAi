@@ -9,6 +9,9 @@ export interface ATM {
   lastRefill: string;
   status: 'online' | 'warning' | 'critical' | 'offline';
   healthScore: number;
+  cash_in?: number;
+  cash_out?: number;
+  predicted_depletion_time?: number;
 }
 
 export const atms: ATM[] = [

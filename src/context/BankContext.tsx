@@ -248,7 +248,7 @@ export const BankProvider: React.FC<{ children: React.ReactNode }> = ({ children
       recs.push({
         id: `rec-atm-${a.id}`,
         title: `Refill ${a.name}`,
-        description: `Cash level is critically low (${((a.currentCash/a.capacity)*100).toFixed(1)}%). Predicted depletion in ${a.predicted_depletion_time.toFixed(1)} hours.`,
+        description: `Cash level is critically low (${((a.currentCash/a.capacity)*100).toFixed(1)}%). Predicted depletion in ${a.predicted_depletion_time?.toFixed(1) || '0'} hours.`,
         type: 'refill',
         priority: 'high'
       });
