@@ -8,6 +8,7 @@ import { motion } from 'framer-motion';
 import { useTheme } from 'next-themes';
 import { useI18n } from '@/context/LanguageContext';
 import Link from 'next/link';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 export default function LiveRoutingRoute() {
   const { theme, setTheme } = useTheme();
@@ -62,7 +63,8 @@ export default function LiveRoutingRoute() {
           </div>
 
           <div className="flex items-center space-x-4">
-            <button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} className="p-2 hover:bg-muted rounded-xl border border-border transition-all">
+            <LanguageSwitcher />
+            <button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} className="p-2.5 hover:bg-muted rounded-xl border border-border transition-all text-muted-foreground hover:text-blue-500">
               {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
             </button>
           </div>

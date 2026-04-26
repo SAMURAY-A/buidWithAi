@@ -1,22 +1,22 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { atms } from '@/data/atmData';
 import DashboardATM from '@/components/DashboardATM';
 import DashboardBank from '@/components/DashboardBank';
 import DashboardGlobal from '@/components/DashboardGlobal';
 import ATMSelector from '@/components/ATMSelector';
 import { useI18n } from '@/context/LanguageContext';
 import Link from 'next/link';
-import { LayoutDashboard, Building2, Globe, Cpu, Menu, X, Bell, Search, Sun, Moon, Languages, Map as MapIcon } from 'lucide-react';
+import { LayoutDashboard, Building2, Globe, Cpu, Menu, X, Bell, Sun, Moon, Map as MapIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from 'next-themes';
 import { useBank } from '@/context/BankContext';
 import NotificationDropdown from '@/components/NotificationDropdown';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
-export default function Home() {
+export default function Dashboard() {
   const { theme, setTheme } = useTheme();
-  const { t, language, setLanguage } = useI18n();
+  const { t } = useI18n();
   const { atms, notifications } = useBank();
   const [activeTab, setActiveTab] = useState<'atm' | 'bank' | 'global'>('atm');
   const [selectedAtmId, setSelectedAtmId] = useState(atms[0].id);
@@ -42,21 +42,20 @@ export default function Home() {
 
   return (
     <div className="flex h-screen bg-background text-foreground overflow-hidden font-sans transition-colors duration-300">
-      {/* Background Mesh */}
-      <div className="fixed inset-0 bg-gradient-mesh pointer-events-none -z-10"></div>
+      <div className="fixed inset-0 bg-gradient-mesh pointer-events-none -z-10 opacity-40"></div>
 
       {/* Persistent Left Sidebar */}
       <motion.aside 
         initial={false}
         animate={{ width: isSidebarOpen ? 280 : 0, opacity: isSidebarOpen ? 1 : 0 }}
-        className="relative h-full bg-sidebar backdrop-blur-3xl border-r border-sidebar-border flex flex-col z-40 overflow-hidden transition-colors"
+        className="relative h-full bg-slate-950/40 backdrop-blur-3xl border-r border-slate-800 flex flex-col z-40 overflow-hidden transition-all"
       >
-        <div className="p-6 h-20 flex items-center border-b border-sidebar-border">
+        <div className="p-6 h-20 flex items-center border-b border-slate-800 bg-slate-900/20">
           <div className="flex items-center space-x-3">
             <div className="bg-gradient-to-br from-blue-600 to-blue-400 p-2 rounded-xl shadow-lg shadow-blue-500/20">
               <Cpu size={20} className="text-white" />
             </div>
-            <span className="font-black text-lg tracking-tight italic">{t('title').split(' ')[0]}<span className="text-blue-500">{t('title').split(' ')[1]}</span></span>
+            <span className="font-black text-lg tracking-tight italic">ATM<span className="text-blue-500">OPT</span></span>
           </div>
         </div>
 
@@ -64,10 +63,10 @@ export default function Home() {
           <div className="p-4 space-y-2">
             <Link 
               href="/live-routing"
-              className="w-full flex items-center space-x-3 p-3 rounded-xl bg-muted/40 border border-transparent hover:border-accent hover:bg-accent/5 text-muted-foreground hover:text-accent transition-all group"
+              className="w-full flex items-center space-x-3 p-3 rounded-xl bg-blue-500/5 border border-blue-500/10 hover:border-blue-500 hover:bg-blue-500/10 text-slate-400 hover:text-blue-500 transition-all group"
             >
               <MapIcon size={20} className="group-hover:scale-110 transition-transform" />
-              <span className="text-sm font-bold truncate">Live Monitoring & Routing</span>
+              <span className="text-xs font-black uppercase tracking-widest truncate">Live Monitoring</span>
             </Link>
           </div>
           <div className="flex-1 overflow-hidden">
@@ -75,12 +74,12 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="p-4 border-t border-sidebar-border">
-           <div className="bg-muted p-3 rounded-xl border border-border flex items-center">
-              <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-xs font-bold mr-3 text-white">SK</div>
+        <div className="p-4 border-t border-slate-800 bg-slate-900/20">
+           <div className="bg-slate-900/50 p-3 rounded-xl border border-slate-800 flex items-center">
+              <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-xs font-black mr-3 text-white shadow-lg shadow-blue-500/20">SK</div>
               <div className="min-w-0">
-                 <div className="text-xs font-bold truncate">Samuray Kh.</div>
-                 <div className="text-[10px] text-muted-foreground uppercase tracking-tighter">Senior Architect</div>
+                 <div className="text-xs font-black truncate text-slate-100">Samuray Kh.</div>
+                 <div className="text-[9px] text-slate-500 uppercase tracking-widest font-black">Lead AI Architect</div>
               </div>
            </div>
         </div>
@@ -89,24 +88,24 @@ export default function Home() {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col h-full relative overflow-hidden">
         {/* Top Header */}
-        <header className="h-20 border-b border-border flex items-center justify-between px-8 bg-background/40 backdrop-blur-md z-30 transition-colors">
+        <header className="h-20 border-b border-slate-800 flex items-center justify-between px-8 bg-slate-950/40 backdrop-blur-md z-30 transition-all">
           <div className="flex items-center space-x-6">
             <button 
               onClick={() => setSidebarOpen(!isSidebarOpen)}
-              className="p-2 hover:bg-muted rounded-lg transition-colors text-muted-foreground"
+              className="p-2 hover:bg-slate-800 rounded-xl transition-colors text-slate-400"
             >
               {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
             
-            <nav className="flex space-x-1 bg-muted p-1 rounded-xl border border-border">
+            <nav className="flex space-x-1 bg-slate-900/50 p-1 rounded-2xl border border-slate-800">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center px-4 py-1.5 rounded-lg transition-all text-xs font-bold tracking-wide uppercase ${
+                  className={`flex items-center px-5 py-2 rounded-xl transition-all text-[10px] font-black tracking-widest uppercase ${
                     activeTab === tab.id
-                      ? 'bg-card text-foreground shadow-lg shadow-black/5 border border-border'
-                      : 'text-muted-foreground hover:text-foreground'
+                      ? 'bg-slate-800 text-foreground shadow-xl border border-slate-700'
+                      : 'text-slate-500 hover:text-foreground'
                   }`}
                 >
                   <tab.icon size={14} className={`mr-2 ${activeTab === tab.id ? tab.color : ''}`} />
@@ -117,25 +116,11 @@ export default function Home() {
           </div>
 
           <div className="flex items-center space-x-4">
-            {/* Language Switcher */}
-            <div className="flex items-center bg-muted rounded-xl border border-border p-1">
-              {(['en', 'uz', 'ru'] as const).map((lang) => (
-                <button
-                  key={lang}
-                  onClick={() => setLanguage(lang)}
-                  className={`px-2 py-1 rounded-lg text-[10px] font-black uppercase transition-all ${
-                    language === lang ? 'bg-card text-blue-500 shadow-sm' : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  {lang}
-                </button>
-              ))}
-            </div>
+            <LanguageSwitcher />
 
-            {/* Theme Toggle */}
             <button 
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              className="p-2 hover:bg-muted rounded-xl border border-border transition-all text-muted-foreground hover:text-blue-500"
+              className="p-2.5 hover:bg-slate-800 rounded-xl border border-slate-800 transition-all text-slate-400 hover:text-blue-500"
             >
               {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
             </button>
@@ -143,11 +128,11 @@ export default function Home() {
             <div className="relative">
               <button 
                 onClick={() => setNotificationsOpen(!isNotificationsOpen)}
-                className={`relative p-2 hover:bg-muted rounded-xl border transition-all ${isNotificationsOpen ? 'border-blue-500 bg-blue-500/5 text-blue-500' : 'border-border text-muted-foreground'}`}
+                className={`relative p-2.5 hover:bg-slate-800 rounded-xl border transition-all ${isNotificationsOpen ? 'border-blue-500 bg-blue-500/10 text-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.3)]' : 'border-slate-800 text-slate-400'}`}
               >
                 <Bell size={18} />
                 {unreadCount > 0 && (
-                  <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-background"></span>
+                  <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-slate-950"></span>
                 )}
               </button>
               <NotificationDropdown isOpen={isNotificationsOpen} onClose={() => setNotificationsOpen(false)} />
@@ -156,35 +141,35 @@ export default function Home() {
         </header>
 
         {/* Scrollable Content Area */}
-        <div className="flex-1 overflow-y-auto custom-scrollbar p-8">
-          <div className="max-w-7xl mx-auto space-y-8 pb-12">
-            <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-10">
+          <div className="max-w-7xl mx-auto space-y-10 pb-20">
+            <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">
               <div>
-                <div className="flex items-center space-x-2 text-[10px] font-bold text-blue-500 uppercase tracking-[0.3em] mb-2">
-                  <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></div>
+                <div className="flex items-center space-x-2 text-[10px] font-black text-blue-500 uppercase tracking-[0.4em] mb-3">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(59,130,246,1)]"></div>
                   <span>{t('systemLive')}</span>
                 </div>
-                <h2 className="text-4xl font-black text-foreground tracking-tight">
+                <h2 className="text-5xl font-black text-foreground tracking-tighter">
                   {activeTab === 'atm' ? t('realTimeAnalysis') : activeTab === 'bank' ? t('cashFlowOpt') : t('logisticsHq')}
                 </h2>
-                <p className="text-muted-foreground mt-2 text-sm font-medium">
-                  {activeTab === 'atm' ? `Tracking ${currentAtm.name} performance metrics.` : 
-                   activeTab === 'bank' ? 'Analyzing branch-level liquidity and redistribution needs.' : 
-                   'High-level overview of network health and cost reduction strategies.'}
+                <p className="text-slate-400 mt-3 text-sm font-medium max-w-2xl leading-relaxed">
+                  {activeTab === 'atm' ? `Deep-dive metrics for ${currentAtm.name}. AI predictive modeling active.` : 
+                   activeTab === 'bank' ? 'Regional liquidity matrix and branch-to-bank capital redistribution flow.' : 
+                   'National logistics oversight, route optimization, and operational cost intelligence.'}
                 </p>
               </div>
               
-              <div className="flex items-center bg-card backdrop-blur border border-border rounded-2xl px-5 py-3 divide-x divide-border">
-                 <div className="pr-5">
-                    <div className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest mb-1">Network Status</div>
-                    <div className="flex items-center space-x-1.5">
-                       <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
-                       <span className="text-xs font-bold text-emerald-500">{t('stable')}</span>
+              <div className="flex items-center bg-slate-900/40 backdrop-blur-xl border border-slate-800 rounded-[24px] px-6 py-4 divide-x divide-slate-800 shadow-2xl">
+                 <div className="pr-6">
+                    <div className="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1">Network Status</div>
+                    <div className="flex items-center space-x-2">
+                       <div className="w-2 h-2 bg-emerald-500 rounded-full shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
+                       <span className="text-xs font-black text-emerald-500 tracking-wider">{t('stable')}</span>
                     </div>
                  </div>
-                 <div className="pl-5">
-                    <div className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest mb-1">{t('lastUpdate')}</div>
-                    <div className="text-xs font-bold text-muted-foreground">2 {t('minAgo')}</div>
+                 <div className="pl-6">
+                    <div className="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1">{t('lastUpdate')}</div>
+                    <div className="text-xs font-black text-slate-300 tracking-wider">0 {t('minAgo')}</div>
                  </div>
               </div>
             </header>
@@ -192,10 +177,10 @@ export default function Home() {
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeTab + selectedAtmId}
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.3 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
               >
                 {activeTab === 'atm' && <DashboardATM selectedAtmId={selectedAtmId} />}
                 {activeTab === 'bank' && <DashboardBank />}

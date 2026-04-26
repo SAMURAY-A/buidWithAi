@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useTheme } from 'next-themes';
+import 'leaflet/dist/leaflet.css';
 
 // Dynamically import Leaflet components to avoid SSR issues
 const MapContainer = dynamic(() => import('react-leaflet').then(mod => mod.MapContainer), { ssr: false });
@@ -11,73 +12,86 @@ const Marker = dynamic(() => import('react-leaflet').then(mod => mod.Marker), { 
 const Popup = dynamic(() => import('react-leaflet').then(mod => mod.Popup), { ssr: false });
 const Polyline = dynamic(() => import('react-leaflet').then(mod => mod.Polyline), { ssr: false });
 
-// We need to import L for custom icons
-let L;
-if (typeof window !== 'undefined') {
-  L = require('leaflet');
+import { useMap } from 'react-leaflet';
+
+function MapController({ center, zoom }) {
+  const map = useMap();
+  useEffect(() => {
+    if (map && center) {
+      map.setView(center, zoom, { animate: true });
+    }
+  }, [center, zoom, map]);
+  return null;
 }
 
 export default function RouteMap({ atms, selectedId, onSelect, route }) {
   const { theme } = useTheme();
   const [isMounted, setIsMounted] = useState(false);
+  const [L, setL] = useState(null);
 
   useEffect(() => {
     setIsMounted(true);
+    import('leaflet').then(leaflet => {
+      setL(leaflet.default);
+    });
   }, []);
 
-  if (!isMounted) return <div className="w-full h-full bg-slate-900 animate-pulse rounded-3xl" />;
+  if (!isMounted || !L) {
+    return <div className="w-full h-full bg-slate-900 animate-pulse rounded-3xl flex items-center justify-center text-slate-500 font-black uppercase tracking-widest">Loading Route Infrastructure...</div>;
+  }
 
-  // Center on Tashkent if no selected, or on selected ATM
-  const center = selectedId 
-    ? [atms.find(a => a.id === selectedId)?.lat || 41.3111, atms.find(a => a.id === selectedId)?.lng || 69.2797]
+  const selectedAtm = atms.find(a => a.id === selectedId);
+  const center = selectedAtm 
+    ? [selectedAtm.lat, selectedAtm.lng]
     : [41.2995, 69.2401];
+  const zoom = selectedAtm ? 15 : 12;
 
   const polylinePositions = route.map(atm => [atm.lat, atm.lng]);
 
   const getMarkerIcon = (hours, isSelected) => {
-    if (!L) return null;
-    
     let color = '#10b981'; // Green
-    if (hours < 24) color = '#ef4444'; // Red
-    else if (hours < 48) color = '#eab308'; // Yellow
+    if (hours < 15) color = '#ef4444'; // Red
+    else if (hours < 40) color = '#f59e0b'; // Yellow
 
+    const size = isSelected ? 28 : 18;
+    
     return L.divIcon({
       className: 'custom-div-icon',
       html: `<div style="
         background-color: ${color};
-        width: ${isSelected ? '24px' : '16px'};
-        height: ${isSelected ? '24px' : '16px'};
+        width: ${size}px;
+        height: ${size}px;
         border-radius: 50%;
         border: 3px solid white;
         box-shadow: 0 0 15px ${color};
         transition: all 0.3s ease;
       "></div>`,
-      iconSize: [isSelected ? 24 : 16, isSelected ? 24 : 16],
-      iconAnchor: [isSelected ? 12 : 8, isSelected ? 12 : 8],
+      iconSize: [size, size],
+      iconAnchor: [size/2, size/2],
     });
   };
 
-  // Dark mode map tiles vs Light mode
   const tileUrl = theme === 'dark' 
     ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
     : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
 
-  const attribution = theme === 'dark'
-    ? '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-    : '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+  const attribution = '&copy; OpenStreetMap contributors';
 
   return (
-    <div className="relative w-full h-full rounded-3xl border border-border overflow-hidden group shadow-2xl transition-all">
+    <div className="relative w-full h-full rounded-[32px] border border-slate-800 overflow-hidden group shadow-2xl transition-all bg-slate-950">
       <MapContainer 
-        center={center} 
+        center={[41.2995, 69.2401]} 
         zoom={12} 
         scrollWheelZoom={true}
-        className="w-full h-full z-10"
+        style={{ height: '100%', width: '100%', background: '#020617' }}
+        zoomControl={false}
       >
         <TileLayer
           attribution={attribution}
           url={tileUrl}
         />
+        
+        <MapController center={center} zoom={zoom} />
         
         {atms.map((atm) => (
           <Marker 
@@ -89,10 +103,11 @@ export default function RouteMap({ atms, selectedId, onSelect, route }) {
             }}
           >
             <Popup className="custom-popup">
-              <div className="p-2">
-                <div className="text-sm font-black mb-1">{atm.name}</div>
-                <div className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">
-                  {atm.predicted_hours_left} Hours Left
+              <div className="p-2 min-w-[150px]">
+                <div className="text-sm font-black text-slate-900 uppercase tracking-tight mb-1">{atm.name.split('—')[1] || atm.name}</div>
+                <div className="flex items-center justify-between">
+                   <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">{atm.predicted_hours_left} Hours Left</span>
+                   <div className={`w-2 h-2 rounded-full ${atm.status === 'critical' ? 'bg-red-500 animate-pulse' : 'bg-emerald-500'}`}></div>
                 </div>
               </div>
             </Popup>
@@ -103,30 +118,35 @@ export default function RouteMap({ atms, selectedId, onSelect, route }) {
           positions={polylinePositions}
           pathOptions={{ 
             color: '#3b82f6', 
-            weight: 4, 
-            opacity: 0.6,
-            dashArray: '10, 10'
+            weight: 5, 
+            opacity: 0.8,
+            dashArray: '12, 12',
+            lineJoin: 'round'
           }}
         />
       </MapContainer>
 
       {/* Floating Legend */}
-      <div className="absolute bottom-6 left-6 bg-background/80 backdrop-blur px-5 py-3 rounded-2xl border border-border z-20 shadow-xl pointer-events-none transition-colors">
-         <div className="text-[10px] text-muted-foreground uppercase font-black tracking-widest mb-2">Refill Priority</div>
-         <div className="flex items-center space-x-5">
+      <div className="absolute bottom-6 left-6 bg-slate-900/90 backdrop-blur-xl px-6 py-4 rounded-[20px] border border-slate-800 z-[1000] shadow-2xl pointer-events-none">
+         <div className="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-3">Refill Route Logistics</div>
+         <div className="flex items-center space-x-6">
             <div className="flex items-center space-x-2">
-               <div className="w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]"></div>
-               <span className="text-[10px] text-foreground font-bold">Critical</span>
+               <div className="w-2.5 h-2.5 rounded-full bg-red-500"></div>
+               <span className="text-[10px] text-slate-300 font-black uppercase">Critical</span>
             </div>
             <div className="flex items-center space-x-2">
-               <div className="w-2.5 h-2.5 rounded-full bg-yellow-500 shadow-[0_0_8px_rgba(234,179,8,0.5)]"></div>
-               <span className="text-[10px] text-foreground font-bold">Warning</span>
+               <div className="w-2.5 h-2.5 rounded-full bg-amber-500"></div>
+               <span className="text-[10px] text-slate-300 font-black uppercase">Warning</span>
             </div>
             <div className="flex items-center space-x-2">
-               <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
-               <span className="text-[10px] text-foreground font-bold">Optimal</span>
+               <div className="w-2.5 h-2.5 rounded-full bg-emerald-500"></div>
+               <span className="text-[10px] text-slate-300 font-black uppercase">Normal</span>
             </div>
          </div>
+      </div>
+
+      <div className="absolute top-6 left-6 z-[1000] bg-blue-600 px-4 py-2 rounded-xl text-[10px] font-black text-white uppercase tracking-widest shadow-xl shadow-blue-500/20">
+         Optimal Refill Path Active
       </div>
     </div>
   );

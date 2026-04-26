@@ -36,14 +36,23 @@ export interface Recommendation {
   id: string;
   title: string;
   description: string;
-  type: 'refill' | 'transfer' | 'security';
+  type: 'refill' | 'transfer' | 'security' | 'redistribute';
   priority: 'high' | 'medium' | 'low';
+  targetId?: string;
+}
+
+export interface CentralBankTransfer {
+  id: string;
+  amount: number;
+  from: string;
+  timestamp: Date;
 }
 
 interface BankContextType {
   atms: ATM[];
   branches: Branch[];
   centralBankCash: number;
+  centralBankTransfers: CentralBankTransfer[];
   notifications: Notification[];
   securityLogs: SecurityLog[];
   recommendations: Recommendation[];
@@ -52,6 +61,8 @@ interface BankContextType {
   dismissNotification: (id: string) => void;
   refillAtm: (id: string) => void;
   transferToCentralBank: (branchId: string, amount: number) => void;
+  autoRedistribute: () => void;
+  requestCIT: (atmId: string) => void;
 }
 
 const BankContext = createContext<BankContextType | undefined>(undefined);
@@ -59,10 +70,9 @@ const BankContext = createContext<BankContextType | undefined>(undefined);
 export const BankProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [atms, setAtms] = useState<ATM[]>(initialAtms.map(atm => ({
     ...atm,
-    // Add extra properties for simulation
-    cash_in: 0,
-    cash_out: Math.random() * 500000 + 100000, // random cash out rate per minute for demo
-    predicted_depletion_time: Math.random() * 72 + 5 // hours
+    cash_in: Math.random() * 200000,
+    cash_out: Math.random() * 500000 + 100000,
+    predicted_depletion_time: Math.random() * 72 + 5
   })));
 
   const [branches, setBranches] = useState<Branch[]>([
@@ -90,12 +100,13 @@ export const BankProvider: React.FC<{ children: React.ReactNode }> = ({ children
       totalCash: 4800000000,
       incomingCash: 150000000,
       outgoingCash: 30000000,
-      maxThreshold: 4500000000, // Trigger excess
+      maxThreshold: 4500000000,
       coordinates: [41.3645, 69.2867]
     }
   ]);
 
   const [centralBankCash, setCentralBankCash] = useState(150240500000);
+  const [centralBankTransfers, setCentralBankTransfers] = useState<CentralBankTransfer[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [securityLogs, setSecurityLogs] = useState<SecurityLog[]>([]);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
@@ -133,23 +144,72 @@ export const BankProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const transferToCentralBank = (branchId: string, amount: number) => {
+    const branch = branches.find(b => b.id === branchId);
+    if (!branch) return;
+
     setBranches(prev => prev.map(b => 
       b.id === branchId ? { ...b, totalCash: b.totalCash - amount } : b
     ));
     setCentralBankCash(prev => prev + amount);
+    setCentralBankTransfers(prev => [
+      { id: Math.random().toString(36).substr(2, 9), amount, from: branch.name, timestamp: new Date() },
+      ...prev
+    ].slice(0, 20));
+
     addNotification({
       title: 'Cash Transfer Complete',
-      message: `Transferred ${amount.toLocaleString()} UZS from branch to Central Bank.`,
+      message: `Transferred ${amount.toLocaleString()} UZS from ${branch.name} to Central Bank.`,
       severity: 'info',
       type: 'branch_excess'
     });
+  };
+
+  const autoRedistribute = () => {
+    // Logic: Find an ATM with high cash and one with low cash, then move some
+    const sorted = [...atms].sort((a, b) => (a.currentCash / a.capacity) - (b.currentCash / b.capacity));
+    const low = sorted[0];
+    const high = sorted[sorted.length - 1];
+
+    if (low && high && (high.currentCash / high.capacity) > 0.7 && (low.currentCash / low.capacity) < 0.2) {
+      const amount = Math.min(high.currentCash * 0.3, low.capacity - low.currentCash);
+      
+      setAtms(prev => prev.map(atm => {
+        if (atm.id === low.id) return { ...atm, currentCash: atm.currentCash + amount, status: 'online' };
+        if (atm.id === high.id) return { ...atm, currentCash: atm.currentCash - amount };
+        return atm;
+      }));
+
+      addNotification({
+        title: 'Auto-Redistribution Active',
+        message: `Moving ${Math.round(amount/1000000)}M UZS from ${high.name} to ${low.name}.`,
+        severity: 'info',
+        type: 'route'
+      });
+    }
+  };
+
+  const requestCIT = (atmId: string) => {
+    const atm = atms.find(a => a.id === atmId);
+    if (!atm) return;
+
+    addNotification({
+      title: 'CIT Vehicle Requested',
+      message: `Emergency refill vehicle dispatched for ${atm.name}. ETA: 45 mins.`,
+      severity: 'warning',
+      type: 'route'
+    });
+    
+    // Simulate arrival after 5 seconds for demo
+    setTimeout(() => {
+      refillAtm(atmId);
+    }, 5000);
   };
 
   // Simulation Logic
   useEffect(() => {
     const interval = setInterval(() => {
       const isWeekend = [0, 6].includes(new Date().getDay());
-      const isSalaryDay = new Date().getDate() === 25; // Today is 25th in simulation!
+      const isSalaryDay = new Date().getDate() === 25;
       
       let multiplier = 1;
       if (isSalaryDay) multiplier = 2.5;
@@ -157,48 +217,49 @@ export const BankProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       // Update ATMs
       setAtms(prev => prev.map(atm => {
-        const cashOut = (Math.random() * 500000 + 100000) * multiplier;
-        const newCash = Math.max(0, atm.currentCash - cashOut);
+        const cashOut = (Math.random() * 800000 + 200000) * multiplier;
+        const cashIn = Math.random() * 300000;
+        const newCash = Math.max(0, atm.currentCash - cashOut + cashIn);
         
         let status = atm.status;
         const percentage = (newCash / atm.capacity) * 100;
         
-        if (percentage < 5) status = 'critical';
-        else if (percentage < 20) status = 'warning';
+        if (percentage < 10) status = 'critical';
+        else if (percentage < 30) status = 'warning';
         else status = 'online';
 
-        // Trigger notifications if critical
         if (status === 'critical' && atm.status !== 'critical') {
           addNotification({
             title: 'Critical Cash Level',
-            message: `${atm.name} is below 5% cash capacity. Emergency refill required.`,
+            message: `${atm.name} is below 10% capacity. Refill required urgently.`,
             severity: 'critical',
             type: 'atm_depletion'
           });
         }
 
-        // Predicted depletion time update (simple logic)
-        const hourlyRate = cashOut * 60;
+        const hourlyRate = (cashOut - cashIn) * 12; // simulated per hour
         const predictedHours = hourlyRate > 0 ? newCash / hourlyRate : 99;
 
         return {
           ...atm,
           currentCash: newCash,
           status,
-          predicted_depletion_time: predictedHours
-        } as ATM;
+          predicted_depletion_time: predictedHours,
+          cash_in: cashIn,
+          cash_out: cashOut
+        };
       }));
 
       // Update Branches
       setBranches(prev => prev.map(branch => {
-        const incoming = Math.random() * 5000000 + 1000000;
-        const outgoing = Math.random() * 3000000 + 500000;
+        const incoming = Math.random() * 10000000 + 2000000;
+        const outgoing = Math.random() * 8000000 + 1000000;
         const newTotal = branch.totalCash + incoming - outgoing;
 
         if (newTotal > branch.maxThreshold && branch.totalCash <= branch.maxThreshold) {
           addNotification({
             title: 'EXCESS CASH ALERT',
-            message: `${branch.name} has exceeded maximum threshold. Redistribution required.`,
+            message: `${branch.name} has exceeded maximum threshold.`,
             severity: 'warning',
             type: 'branch_excess'
           });
@@ -207,14 +268,14 @@ export const BankProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return {
           ...branch,
           totalCash: newTotal,
-          incomingCash: incoming * 60,
-          outgoingCash: outgoing * 60
+          incomingCash: incoming,
+          outgoingCash: outgoing
         };
       }));
 
       // Random Security Log
-      if (Math.random() > 0.95) {
-        const types: SecurityLog['type'][] = ['Credential Stuffing', 'SQL Injection', 'Data Exfiltration'];
+      if (Math.random() > 0.98) {
+        const types: SecurityLog['type'][] = ['Credential Stuffing', 'SQL Injection', 'DDoS', 'Brute Force'];
         const type = types[Math.floor(Math.random() * types.length)];
         const newLog: SecurityLog = {
           id: Math.random().toString(36).substr(2, 9),
@@ -225,45 +286,49 @@ export const BankProvider: React.FC<{ children: React.ReactNode }> = ({ children
           severity: 'high'
         };
         setSecurityLogs(prev => [newLog, ...prev].slice(0, 20));
-        
-        addNotification({
-          title: 'Security Incident Detected',
-          message: `${type} attack attempted and blocked.`,
-          severity: 'critical',
-          type: 'security'
-        });
+        addNotification({ title: 'Security Incident Blocked', message: `${type} attempt mitigated.`, severity: 'critical', type: 'security' });
       }
 
-    }, 5000); // Update every 5 seconds for simulation speed
+    }, 4000);
 
     return () => clearInterval(interval);
-  }, [addNotification]);
+  }, [addNotification, refillAtm]);
 
   // AI Recommendations Logic
   useEffect(() => {
     const recs: Recommendation[] = [];
     
-    // Check for critical ATMs
     atms.filter(a => a.status === 'critical').forEach(a => {
       recs.push({
         id: `rec-atm-${a.id}`,
         title: `Refill ${a.name}`,
-        description: `Cash level is critically low (${((a.currentCash/a.capacity)*100).toFixed(1)}%). Predicted depletion in ${a.predicted_depletion_time?.toFixed(1) || '0'} hours.`,
+        description: `Predicted depletion in ${a.predicted_depletion_time?.toFixed(1) || '0'}h. Request CIT.`,
         type: 'refill',
-        priority: 'high'
+        priority: 'high',
+        targetId: a.id
       });
     });
 
-    // Check for excess branch cash
     branches.filter(b => b.totalCash > b.maxThreshold).forEach(b => {
       recs.push({
         id: `rec-br-${b.id}`,
         title: `Transfer from ${b.name}`,
-        description: `Branch exceeds threshold by ${(b.totalCash - b.maxThreshold).toLocaleString()} UZS.`,
+        description: `Excess liquidity: ${Math.round((b.totalCash - b.maxThreshold)/1000000)}M UZS.`,
         type: 'transfer',
-        priority: 'medium'
+        priority: 'medium',
+        targetId: b.id
       });
     });
+
+    if (atms.some(a => a.status === 'critical') && atms.some(a => (a.currentCash/a.capacity) > 0.8)) {
+      recs.push({
+        id: 'rec-redist',
+        title: 'Optimize Network Balance',
+        description: 'Imbalance detected. Auto-redistribute suggested.',
+        type: 'redistribute',
+        priority: 'low'
+      });
+    }
 
     setRecommendations(recs);
   }, [atms, branches]);
@@ -273,6 +338,7 @@ export const BankProvider: React.FC<{ children: React.ReactNode }> = ({ children
       atms,
       branches,
       centralBankCash,
+      centralBankTransfers,
       notifications,
       securityLogs,
       recommendations,
@@ -280,7 +346,9 @@ export const BankProvider: React.FC<{ children: React.ReactNode }> = ({ children
       markNotificationAsRead,
       dismissNotification,
       refillAtm,
-      transferToCentralBank
+      transferToCentralBank,
+      autoRedistribute,
+      requestCIT
     }}>
       {children}
     </BankContext.Provider>
@@ -289,8 +357,6 @@ export const BankProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
 export const useBank = () => {
   const context = useContext(BankContext);
-  if (context === undefined) {
-    throw new Error('useBank must be used within a BankProvider');
-  }
+  if (context === undefined) throw new Error('useBank must be used within a BankProvider');
   return context;
 };
