@@ -481,7 +481,6 @@ export const translations = {
     operatorMsg: "Здравствуйте, я оператор №104. Я получил уведомление о вашей проблеме. Чем я могу помочь?",
     nextCritical: "След. Критический",
     totalStops: "Остановок",
-    optimalRefillPath: "Оптимальный Маршрут Активен",
     optimalRefillWindow: "Оптимальное Окно Пополнения",
     liveMonitoring: "Мониторинг Сети",
     leadAiArchitect: "Ведущий AI Архитектор",
